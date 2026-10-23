@@ -7,7 +7,8 @@
 void PluNetwork::InitializeNetwork()
 {
 #ifdef PLU_PLATFORM_WINDOWS
-    WSADATA d; WSAStartup(MAKEWORD(2, 2), &d);
+    WSADATA d;
+    WSAStartup(MAKEWORD(2, 2), &d);
 #endif
 }
 

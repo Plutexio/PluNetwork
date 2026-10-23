@@ -7,6 +7,7 @@
 
 #include <PluBase/Base.h>
 
+#include "Socket.h"
 #include "PluSTL/String/String.h"
 
 namespace PluNetwork
@@ -24,7 +25,7 @@ namespace PluNetwork
     struct Endpoint
     {
         Plu::String Name;
-        Int16 Port;
+        PortType Port;
     };
 }
 

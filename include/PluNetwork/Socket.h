@@ -10,13 +10,10 @@
 #include <PluBase/Base.h>
 #include "Core.h"
 
-namespace PluNetwork
-{
 #ifdef PLU_PLATFORM_WINDOWS
     #include <winsock2.h>
     #include <ws2tcpip.h>
     #pragma comment(lib, "ws2_32.lib")
-    using SocketType = SOCKET;
 #else
     #include <sys/socket.h>
     #include <sys/types.h>
@@ -24,8 +21,23 @@ namespace PluNetwork
     #include <netinet/in.h>
     #include <arpa/inet.h>
     #include <unistd.h>
+#endif
+
+namespace PluNetwork
+{
+#ifdef PLU_PLATFORM_WINDOWS
+    using SocketType = SOCKET;
+    #error "Define PortType!"
+    #error "Define GetLastError!"
+    #error "Define InterruptedError!"
+    #error "Define ConnectionAbortedError!"
+#else
     using SocketType = int;
     constexpr SocketType INVALID_SOCKET = -1;
+    using PortType = in_port_t;
+    inline int GetLastError() { return errno; }
+    inline bool InterruptedError(int errorCode) { return errorCode == EINTR; }
+    inline bool ConnectionAbortedError(int errorCode) { return errorCode == ECONNABORTED; }
 #endif
 
     class Socket {

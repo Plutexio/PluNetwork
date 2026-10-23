@@ -5,6 +5,8 @@
 #ifndef PLUNETWORK_TCPSTREAM_H
 #define PLUNETWORK_TCPSTREAM_H
 
+#include <PluSTL/PluSTL_FWD.h>
+
 #include "PluNetwork/Core.h"
 #include "PluNetwork/Network.h"
 #include "PluNetwork/Socket.h"
@@ -14,12 +16,14 @@ namespace PluNetwork
     class PLUNETWORK_API TcpStream
     {
         Socket mSocket;
-        friend class TcpListener;
     public:
-        TcpStream(Endpoint endpoint, Socket socket);
+        static Plu::TOwningPointer<PluNetwork::TcpStream> Connect(Endpoint endpoint);
         ~TcpStream();
 
-        Endpoint Peer();
+        [[nodiscard]] Endpoint Peer() const;
+    private:
+        explicit TcpStream(Socket socket);
+        friend class TcpListener;
     };
 }
 

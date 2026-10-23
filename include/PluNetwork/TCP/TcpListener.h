@@ -5,6 +5,8 @@
 #ifndef PLUNETWORK_TCPLISTENER_H
 #define PLUNETWORK_TCPLISTENER_H
 
+#include <PluSTL/PluSTL_FWD.h>
+
 #include "PluNetwork/Core.h"
 #include "PluNetwork/Network.h"
 #include "PluNetwork/TCP/TcpStream.h"
@@ -15,10 +17,10 @@ namespace PluNetwork
     {
         Socket mSocket;
     public:
-        TcpListener(Endpoint endpoint);
+        TcpListener(PortType port);
 
         //Can Block the execution to wait for client
-        TcpStream Accept();
+        Plu::TOwningPointer<TcpStream> Accept();
     };
 }
 
