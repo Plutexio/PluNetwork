@@ -13,4 +13,8 @@
     #define PLUNETWORK_API PLU_IMPORT
 #endif
 
+//Ones digit is major version (breaking changes), tenths number is minor changes in protocol (SHOULD work fine)
+#define PLU_PROTOCOL_VERSION 1.0
+#define PLU_MAGIC "PLUN"
+
 #endif //PLUNETWORK_CORE_H
