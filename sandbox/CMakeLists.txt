@@ -1,0 +1,3 @@
+add_executable(PluNetworkSandbox Main.cpp)
+target_link_libraries(PluNetworkSandbox PRIVATE PluNetwork::PluNetwork)
+plunetwork_copy_runtime_dlls(PluNetworkSandbox)
