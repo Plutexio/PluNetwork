@@ -163,18 +163,5 @@ PluNetwork::Endpoint PluNetwork::TcpStream::Peer() const
         return Endpoint{};
     }
 
-    char host[INET6_ADDRSTRLEN] = {};
-    std::uint16_t port = 0;
-
-    if (ss.ss_family == AF_INET) {
-        const auto& a = reinterpret_cast<const sockaddr_in&>(ss);
-        inet_ntop(AF_INET, &a.sin_addr, host, sizeof host);
-        port = ntohs(a.sin_port);
-    } else if (ss.ss_family == AF_INET6) {
-        const auto& a = reinterpret_cast<const sockaddr_in6&>(ss);
-        inet_ntop(AF_INET6, &a.sin6_addr, host, sizeof host);
-        port = ntohs(a.sin6_port);
-    }
-
-    return Endpoint{.Name = host, .Port = port};
+    return EndpointFromSockaddr(&ss);
 }

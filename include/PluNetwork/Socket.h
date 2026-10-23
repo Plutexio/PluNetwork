@@ -25,6 +25,7 @@
 
 namespace PluNetwork
 {
+    struct Endpoint;
 #ifdef PLU_PLATFORM_WINDOWS
     using SocketType = SOCKET;
     #error "Define PortType!"
@@ -39,6 +40,8 @@ namespace PluNetwork
     inline bool InterruptedError(int errorCode) { return errorCode == EINTR; }
     inline bool ConnectionAbortedError(int errorCode) { return errorCode == ECONNABORTED; }
 #endif
+
+    PLUNETWORK_API Endpoint EndpointFromSockaddr(sockaddr_storage* addr);
 
     class Socket {
     public:
