@@ -54,7 +54,10 @@ option(PLUNETWORK_BUILD_SANDBOX "Build the PluNetwork sandbox executable" ${PROJ
 file(GLOB_RECURSE PLUNETWORK_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 file(GLOB_RECURSE PLUNETWORK_HEADERS CONFIGURE_DEPENDS "include/*.h" "src/*.h")
 
-add_library(PluNetwork SHARED ${PLUNETWORK_SOURCES} ${PLUNETWORK_HEADERS})
+add_library(PluNetwork SHARED ${PLUNETWORK_SOURCES} ${PLUNETWORK_HEADERS}
+        include/PluNetwork/TCP/TcpListener.h
+        src/TCP/TcpStream.cpp
+        src/TCP/TcpListener.cpp)
 add_library(PluNetwork::PluNetwork ALIAS PluNetwork)
 
 target_include_directories(PluNetwork

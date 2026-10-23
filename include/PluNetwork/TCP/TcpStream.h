@@ -7,14 +7,19 @@
 
 #include "PluNetwork/Core.h"
 #include "PluNetwork/Network.h"
+#include "PluNetwork/Socket.h"
 
 namespace PluNetwork
 {
     class PLUNETWORK_API TcpStream
     {
+        Socket mSocket;
+        friend class TcpListener;
     public:
-        TcpStream(Endpoint endpoint);
+        TcpStream(Endpoint endpoint, Socket socket);
         ~TcpStream();
+
+        Endpoint Peer();
     };
 }
 
