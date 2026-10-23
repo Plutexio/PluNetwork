@@ -11,4 +11,5 @@ void PluNetwork::Socket::Reset()
 #else
     close(mHandle);
 #endif
+    mHandle = INVALID_SOCKET;
 }

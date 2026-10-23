@@ -58,7 +58,7 @@ namespace PluNetwork
         [[nodiscard]] SocketType GetHandle() const { return mHandle; }
 
     private:
-        void Reset();   // w .cpp: closesocket()/close(), jeśli valid()
+        void Reset();
         SocketType mHandle = INVALID_SOCKET;
     };
 }
