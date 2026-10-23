@@ -32,9 +32,14 @@ namespace PluNetwork
         bool SendBuffer(const DynamicArray<std::byte>& data);
         bool ReceiveBuffer(DynamicArray<std::byte>* data, UInt32 maxSize = 16 * 1024 * 1024);
 
+        //String with the same length prefix, without the null terminator
+        bool SendString(const Plu::String& string);
+        bool ReceiveString(Plu::String* string, UInt32 maxSize = 16 * 1024 * 1024);
+
         [[nodiscard]] Endpoint Peer() const;
     private:
         explicit TcpStream(Socket socket);
+        bool SendFramed(const std::byte* data, UInt64 size);
         friend class TcpListener;
     };
 }

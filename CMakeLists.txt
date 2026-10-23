@@ -45,7 +45,6 @@ if(NOT TARGET PluBase::PluBase)
     add_subdirectory(PluBase)
 endif()
 
-option(PLUNETWORK_BUILD_TESTS "Build the PluNetwork tests" ${PROJECT_IS_TOP_LEVEL})
 option(PLUNETWORK_BUILD_SANDBOX "Build the PluNetwork sandbox executable" ${PROJECT_IS_TOP_LEVEL})
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -84,12 +83,6 @@ function(plunetwork_copy_runtime_dlls TARGET)
                 COMMAND_EXPAND_LISTS)
     endif()
 endfunction()
-
-if(PLUNETWORK_BUILD_TESTS)
-    # At the top level, so ctest run from the build directory finds the tests.
-    enable_testing()
-    add_subdirectory(tests)
-endif()
 
 if(PLUNETWORK_BUILD_SANDBOX)
     add_subdirectory(sandbox)

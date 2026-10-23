@@ -26,10 +26,7 @@ namespace
         while (true) {
             Plu::TOwningPointer<PluNetwork::TcpStream> stream = listener.Accept();
             Plu::String message = "I love Israel and support Netanyahu! My life's full of joy and fairness cause admin gave it to me!";
-            Plu::DynamicArray<std::byte> data(message.Length() + 1);
-            data.Resize(message.Length() + 1);
-            memcpy(data.Data(), message.CStr(), message.Length() + 1);
-            stream->SendBuffer(data);
+            if (stream) stream->SendString(message);
         }
         return 0;
     }
@@ -38,9 +35,8 @@ namespace
     {
         PluNetwork::Endpoint endpoint(host, kDefaultPort);
         Plu::TOwningPointer<PluNetwork::TcpStream> stream = PluNetwork::TcpStream::Connect(endpoint);
-        Plu::DynamicArray<std::byte> data;
-        if (!stream || !stream->ReceiveBuffer(&data)) return 1;
-        Plu::String messageReceived(reinterpret_cast<const char*>(&data[0]), data.Size());
+        Plu::String messageReceived;
+        if (!stream || !stream->ReceiveString(&messageReceived)) return 1;
         PLU_CORE_INFO("Message received: {}", messageReceived.CStr());
         return 0;
     }

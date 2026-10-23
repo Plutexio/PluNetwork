@@ -107,15 +107,20 @@ bool PluNetwork::TcpStream::ReceiveAll(std::byte* data, UInt64 size)
     return true;
 }
 
-bool PluNetwork::TcpStream::SendBuffer(const DynamicArray<std::byte>& data)
+bool PluNetwork::TcpStream::SendFramed(const std::byte* data, UInt64 size)
 {
-    if (data.Size() > UINT32_MAX) {
-        PLU_CORE_ERROR("Buffer too large to send! {} bytes", data.Size());
+    if (size > UINT32_MAX) {
+        PLU_CORE_ERROR("Buffer too large to send! {} bytes", size);
         return false;
     }
-    UInt32 header = htonl(static_cast<UInt32>(data.Size()));
+    UInt32 header = htonl(static_cast<UInt32>(size));
     return SendAll(reinterpret_cast<const std::byte*>(&header), sizeof(header))
-        && SendAll(data.Data(), data.Size());
+        && SendAll(data, size);
+}
+
+bool PluNetwork::TcpStream::SendBuffer(const DynamicArray<std::byte>& data)
+{
+    return SendFramed(data.Data(), data.Size());
 }
 
 bool PluNetwork::TcpStream::ReceiveBuffer(DynamicArray<std::byte>* data, UInt32 maxSize)
@@ -134,6 +139,19 @@ bool PluNetwork::TcpStream::ReceiveBuffer(DynamicArray<std::byte>* data, UInt32 
         return false;
     }
     return ReceiveAll(data->Data(), size);
+}
+
+bool PluNetwork::TcpStream::SendString(const Plu::String& string)
+{
+    return SendFramed(reinterpret_cast<const std::byte*>(string.CStr()), string.Length());
+}
+
+bool PluNetwork::TcpStream::ReceiveString(Plu::String* string, UInt32 maxSize)
+{
+    DynamicArray<std::byte> data;
+    if (!ReceiveBuffer(&data, maxSize)) return false;
+    *string = Plu::String(reinterpret_cast<const char*>(data.Data()), data.Size());
+    return true;
 }
 
 PluNetwork::Endpoint PluNetwork::TcpStream::Peer() const
