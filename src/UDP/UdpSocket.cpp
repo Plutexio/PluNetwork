@@ -2,6 +2,8 @@
 // Created by Plutex on 10/24/26.
 //
 
+#include <utility>
+
 #include "PluNetwork/UDP/UdpSocket.h"
 
 #include "PluBase/Log.h"
@@ -31,6 +33,17 @@ Plu::TOwningPointer<PluNetwork::UdpSocket> PluNetwork::UdpSocket::Bind(Endpoint 
     }
 
     return Plu::TOwningPointer(new UdpSocket(std::move(socketObject)));
+}
+
+void PluNetwork::UdpSocket::SendAll(const std::byte *data, UInt64 size, Endpoint target) {
+    if (!mSocket.IsValid()) return;
+    sockaddr_storage address{};
+    int result = ResolveAddress(std::move(target), &address);
+    if (result != 0) {
+        PLU_CORE_ERROR("ResolveAddress failed! {}", std::strerror(result));
+        return;
+    }
+    UInt64 n = sendto(mSocket.GetHandle(), data, size, 0, reinterpret_cast<sockaddr*>(&address), sizeof(address));
 }
 
 PluNetwork::UdpPacket PluNetwork::UdpSocket::Receive(const std::byte *data, UInt64 size)

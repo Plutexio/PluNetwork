@@ -24,6 +24,21 @@ PluNetwork::Endpoint PluNetwork::EndpointFromSockaddr(sockaddr_storage *addr)
     return Endpoint{.Name = host, .Port = port};
 }
 
+int PluNetwork::ResolveAddress(Endpoint endpoint, sockaddr_storage *addr) {
+    int result;
+    addrinfo* result_list = NULL;
+    addrinfo hints = {};
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
+    result = getaddrinfo(endpoint.Name.CStr(), Plu::String::FromInt(endpoint.Port).CStr(), &hints, &result_list);
+    if (result == 0)
+    {
+        memcpy(addr, result_list->ai_addr, result_list->ai_addrlen);
+        freeaddrinfo(result_list);
+    }
+    return result;
+}
+
 void PluNetwork::Socket::Reset()
 {
     if (!IsValid()) return;

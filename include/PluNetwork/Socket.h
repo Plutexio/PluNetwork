@@ -42,6 +42,7 @@ namespace PluNetwork
 #endif
 
     PLUNETWORK_API Endpoint EndpointFromSockaddr(sockaddr_storage* addr);
+    PLUNETWORK_API int ResolveAddress(Endpoint endpoint, sockaddr_storage* addr);
 
     class Socket {
     public:
