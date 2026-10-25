@@ -41,8 +41,17 @@ namespace PluNetwork
     inline bool ConnectionAbortedError(int errorCode) { return errorCode == ECONNABORTED; }
 #endif
 
-    PLUNETWORK_API Endpoint EndpointFromSockaddr(sockaddr_storage* addr);
-    PLUNETWORK_API int ResolveAddress(Endpoint endpoint, sockaddr_storage* addr);
+    //Resolved socket address, ready to pass to sendto / connect without another lookup
+    struct Address
+    {
+        sockaddr_storage Storage{};
+        socklen_t Length = 0;
+    };
+
+    PLUNETWORK_API Endpoint EndpointFromSockaddr(const sockaddr_storage* addr);
+    PLUNETWORK_API Endpoint EndpointFromAddress(const Address& address);
+    //Can block on a DNS lookup. socketType is SOCK_STREAM or SOCK_DGRAM
+    PLUNETWORK_API bool ResolveAddress(const Endpoint& endpoint, int socketType, Address* address);
 
     class Socket {
     public:

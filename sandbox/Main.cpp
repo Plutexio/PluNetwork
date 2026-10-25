@@ -16,17 +16,33 @@
 #include <cstring>
 #include <string_view>
 
+#include "PluNetwork/UDP/UdpSocket.h"
+
 namespace
 {
     constexpr UInt16 kDefaultPort = 27015;
+    PluNetwork::TransmissionProtocol protocol = PluNetwork::TransmissionProtocol::TCP;
 
     int RunServer()
     {
         PluNetwork::TcpListener listener(kDefaultPort);
+        //Same port number as TCP is fine, UDP and TCP ports are separate
+        Plu::TOwningPointer<PluNetwork::UdpSocket> socket = PluNetwork::UdpSocket::Bind(kDefaultPort);
+        if (!socket) return 1;
+
         while (true) {
             Plu::TOwningPointer<PluNetwork::TcpStream> stream = listener.Accept();
+            if (!stream) continue;
             Plu::String message = "I love Israel and support Netanyahu! My life's full of joy and fairness cause admin gave it to me!";
-            if (stream) stream->SendString(message);
+            stream->SendString(message);
+
+            //Client talks first over UDP, so its UDP address comes with the datagram
+            Plu::String hello;
+            PluNetwork::Address client;
+            if (!socket->ReceiveString(&hello, &client)) continue;
+            PluNetwork::Endpoint from = PluNetwork::EndpointFromAddress(client);
+            PLU_CORE_INFO("UDP from {}:{}: {}", from.Name.CStr(), from.Port, hello.CStr());
+            socket->SendString(message, client);
         }
         return 0;
     }
@@ -38,6 +54,11 @@ namespace
         Plu::String messageReceived;
         if (!stream || !stream->ReceiveString(&messageReceived)) return 1;
         PLU_CORE_INFO("Message received: {}", messageReceived.CStr());
+        //Port 0, the server learns it from our first datagram
+        Plu::TOwningPointer<PluNetwork::UdpSocket> socket = PluNetwork::UdpSocket::Bind(0);
+        if (!socket || !socket->SendString(message, endpoint)) return 1;
+        if (!socket->ReceiveString(&messageReceived)) return 1;
+        PLU_CORE_INFO("UDP message received: {}", messageReceived.CStr());
         return 0;
     }
 
