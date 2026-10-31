@@ -105,40 +105,10 @@ namespace
         Plu::TOwningPointer<PluNetwork::UdpSocket> socket = PluNetwork::UdpSocket::Bind(kDefaultPort);
         if (!socket) return 1;
 
-        PluNetwork::PacketWriter writer;
-        //Datagrams come from anyone, the handler gets the sender to reply to
-        PluNetwork::PacketDispatcher<const PluNetwork::Address&> dispatcher;
-        dispatcher.On<ChatMessage>([&](const ChatMessage& hello, const PluNetwork::Address& client) {
-            PluNetwork::Endpoint from = PluNetwork::EndpointFromAddress(client);
-            PLU_CORE_INFO("UDP from {}:{} <{}>: {}", from.Name.CStr(), from.Port, hello.Author.CStr(), hello.Text.CStr());
-
-            writer.Clear();
-            PluNetwork::WritePacket(writer, PlayerState{
-                .Id = 7,
-                .Position = {1.5f, -2.0f, 10.25f},
-                .Rotation = Quaternion(1.0f, 0.0f, 0.0f, 0.0f),
-                .Alive = true,
-                .Inventory = {3, 14, 15},
-            });
-            socket->SendBuffer(writer.Buffer(), client);
-        });
-
         while (true) {
-            Plu::TOwningPointer<PluNetwork::TcpStream> stream = listener.Accept();
-            if (!stream) continue;
-            writer.Clear();
-            PluNetwork::WritePacket(writer, ChatMessage{
-                .Author = "Server",
-                .Text = "I love Israel and support Netanyahu! My life's full of joy and fairness cause admin gave it to me!",
-                .Timestamp = 1,
-            });
-            stream->SendBuffer(writer.Buffer());
-
-            //Client talks first over UDP, so its UDP address comes with the datagram
-            DynamicArray<std::byte> buffer;
-            PluNetwork::Address client;
-            if (!socket->ReceiveBuffer(&buffer, &client)) continue;
-            Dispatch(dispatcher, buffer, client);
+            Plu::String msg;
+            socket->ReceiveString(&msg);
+            PLU_CORE_INFO("{}", msg.CStr());
         }
         return 0;
     }
@@ -198,6 +168,13 @@ int main(int argc, char** argv)
         const char* host = argc > 2 ? argv[2] : "127.0.0.1";
         const char* message = argc > 3 ? argv[3] : "hello";
         result = RunClient(host, message);
+    } else if (std::strcmp(argv[1], "--broadcast") == 0) {
+        PluNetwork::Endpoint endpoint{};
+        endpoint.Name = "255.255.255.255";
+        endpoint.Port = kDefaultPort;
+        auto stream = PluNetwork::UdpSocket::Bind(0);
+        stream->SetBroadcast(true);
+        result = stream->SendString("Hello World!", endpoint);
     } else {
         PrintUsage();
     }

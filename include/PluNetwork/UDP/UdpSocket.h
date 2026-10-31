@@ -50,6 +50,8 @@ namespace PluNetwork
         bool SendString(const Plu::String& string, const Endpoint& target);
         bool ReceiveString(Plu::String* string, Address* from = nullptr, UInt32 maxSize = MaxDatagramSize);
 
+        bool SetBroadcast(bool enable) const;
+
         //Biggest UDP payload over IPv4 (65535 - 8 byte UDP header - 20 byte IP header)
         static constexpr UInt32 MaxDatagramSize = 65507;
     private:

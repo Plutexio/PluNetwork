@@ -156,6 +156,17 @@ bool PluNetwork::UdpSocket::ReceiveString(Plu::String* string, Address* from, UI
     return true;
 }
 
+bool PluNetwork::UdpSocket::SetBroadcast(bool enable) const
+{
+    if (!mSocket.IsValid()) return false;
+    int yes = enable;
+    if (setsockopt(mSocket.GetHandle(), SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes)) != 0) {
+        PLU_CORE_ERROR("SetBroadcast failed! {}", std::strerror(GetLastError()));
+        return false;
+    }
+    return true;
+}
+
 PluNetwork::UdpSocket::UdpSocket(Socket socket)
     : mSocket(std::move(socket))
 {
