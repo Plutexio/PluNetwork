@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.3)
+cmake_minimum_required(VERSION 3.24)
 project(PluNetwork
         VERSION 0.1.0
         DESCRIPTION "Networking on raw OS sockets"
@@ -7,13 +7,19 @@ project(PluNetwork
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# PluSTL and PluBase are git submodules (github.com/Plutexio/PluSTL, github.com/Plutexio/PluBase).
-foreach(PLU_SUBMODULE PluSTL PluBase)
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${PLU_SUBMODULE}/CMakeLists.txt")
-        message(FATAL_ERROR "${PLU_SUBMODULE}/ is empty — the submodule is not checked out. Run:\n"
+# PluSTL and PluBase are git submodules (github.com/Plutexio/PluSTL, github.com/Plutexio/PluBase),
+# needed only when the parent project does not provide the targets. PluEngine adds its own copies
+# and checks PluNetwork out without --recursive, so these directories are empty there.
+function(plunetwork_add_submodule NAME)
+    if(TARGET ${NAME}::${NAME})
+        return()
+    endif()
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${NAME}/CMakeLists.txt")
+        message(FATAL_ERROR "${NAME}/ is empty — the submodule is not checked out. Run:\n"
                 "  git submodule update --init")
     endif()
-endforeach()
+    add_subdirectory(${NAME})
+endfunction()
 
 # PluBase's own dependencies: an installed package when there is one, otherwise fetched at the
 # versions PluEngine vendors. spdlog has to be shared, for the same reason PluBase is: one logger
@@ -38,12 +44,8 @@ if(NOT TARGET glm::glm)
     FetchContent_MakeAvailable(glm)
 endif()
 
-if(NOT TARGET PluSTL::PluSTL)
-    add_subdirectory(PluSTL)
-endif()
-if(NOT TARGET PluBase::PluBase)
-    add_subdirectory(PluBase)
-endif()
+plunetwork_add_submodule(PluSTL)
+plunetwork_add_submodule(PluBase)
 
 option(PLUNETWORK_BUILD_SANDBOX "Build the PluNetwork sandbox executable" ${PROJECT_IS_TOP_LEVEL})
 
