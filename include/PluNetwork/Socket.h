@@ -28,10 +28,10 @@ namespace PluNetwork
     struct Endpoint;
 #ifdef PLU_PLATFORM_WINDOWS
     using SocketType = SOCKET;
-    #error "Define PortType!"
-    #error "Define GetLastError!"
-    #error "Define InterruptedError!"
-    #error "Define ConnectionAbortedError!"
+    using PortType = USHORT;
+    inline int GetLastError() { return WSAGetLastError(); }
+    inline bool InterruptedError(int errorCode) { return errorCode == WSAEINTR; }
+    inline bool ConnectionAbortedError(int errorCode) { return errorCode == WSAECONNABORTED || errorCode == WSAECONNRESET; }
 #else
     using SocketType = int;
     constexpr SocketType INVALID_SOCKET = -1;

@@ -160,7 +160,7 @@ bool PluNetwork::UdpSocket::SetBroadcast(bool enable) const
 {
     if (!mSocket.IsValid()) return false;
     int yes = enable;
-    if (setsockopt(mSocket.GetHandle(), SOL_SOCKET, SO_BROADCAST, &yes, sizeof(yes)) != 0) {
+    if (setsockopt(mSocket.GetHandle(), SOL_SOCKET, SO_BROADCAST, reinterpret_cast<const char*>(&yes), sizeof(yes)) != 0) {
         PLU_CORE_ERROR("SetBroadcast failed! {}", std::strerror(GetLastError()));
         return false;
     }

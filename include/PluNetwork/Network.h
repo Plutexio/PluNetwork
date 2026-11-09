@@ -12,8 +12,8 @@
 
 namespace PluNetwork
 {
-    void InitializeNetwork();
-    void ShutdownNetwork();
+    PLUNETWORK_API void InitializeNetwork();
+    PLUNETWORK_API void ShutdownNetwork();
 
     enum class TransmissionProtocol
     {

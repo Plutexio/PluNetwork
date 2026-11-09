@@ -47,12 +47,22 @@ UInt64 PluNetwork::TcpStream::Send(DynamicArray<std::byte> data)
 {
     UInt64 sent = 0;
     while (sent < data.Size()) {
+#ifdef PLU_PLATFORM_WINDOWS
+        UInt64 n = send(mSocket.GetHandle(), reinterpret_cast<const char*>(data.Data() + sent), data.Size() - sent, 0);
+        if (n == SOCKET_ERROR) {
+            int error = GetLastError();
+            if (InterruptedError(error)) continue;
+            PLU_CORE_ERROR("Send failed! {}", strerror(GetLastError()));
+            break;
+        }
+#else
         ssize_t n = send(mSocket.GetHandle(), data.Data() + sent, data.Size() - sent, MSG_NOSIGNAL);
         if (n < 0) {
             if (InterruptedError(GetLastError())) continue;
             PLU_CORE_ERROR("Send failed! {}", strerror(GetLastError()));
             break;
         }
+#endif
         sent += n;
     }
     return sent;
@@ -62,6 +72,16 @@ UInt64 PluNetwork::TcpStream::Receive(DynamicArray<std::byte> *data)
 {
     data->Resize(data->Capacity());
     for (;;) {
+#ifdef PLU_PLATFORM_WINDOWS
+        UInt64 n = recv(mSocket.GetHandle(), reinterpret_cast<char*>(data->Data()), data->Size(), 0);
+        if (n == SOCKET_ERROR && InterruptedError(GetLastError())) continue;
+        if (n == SOCKET_ERROR) {
+            PLU_CORE_ERROR("Receive failed! {}", strerror(GetLastError()));
+            n = 0;
+        }
+        data->Resize(n);
+        return n;
+#else
         ssize_t n = recv(mSocket.GetHandle(), data->Data(), data->Size(), 0);
         if (n < 0 && InterruptedError(GetLastError())) continue;
         if (n < 0) {
@@ -70,6 +90,7 @@ UInt64 PluNetwork::TcpStream::Receive(DynamicArray<std::byte> *data)
         }
         data->Resize(n);
         return n;
+#endif
     }
 }
 
@@ -77,12 +98,22 @@ bool PluNetwork::TcpStream::SendAll(const std::byte* data, UInt64 size)
 {
     UInt64 sent = 0;
     while (sent < size) {
-        ssize_t n = send(mSocket.GetHandle(), data + sent, size - sent, MSG_NOSIGNAL);
+#ifdef PLU_PLATFORM_WINDOWS
+        UInt64 n = send(mSocket.GetHandle(), reinterpret_cast<const char*>(data + sent), size - sent, 0);
+        if (n == SOCKET_ERROR) {
+            int error = GetLastError();
+            if (InterruptedError(error)) continue;
+            PLU_CORE_ERROR("Send failed! {}", strerror(GetLastError()));
+            break;
+        }
+#else
+        ssize_t n = send(mSocket.GetHandle(), data.Data() + sent, data.Size() - sent, MSG_NOSIGNAL);
         if (n < 0) {
             if (InterruptedError(GetLastError())) continue;
             PLU_CORE_ERROR("Send failed! {}", strerror(GetLastError()));
-            return false;
+            break;
         }
+#endif
         sent += n;
     }
     return true;
@@ -92,12 +123,22 @@ bool PluNetwork::TcpStream::ReceiveAll(std::byte* data, UInt64 size)
 {
     UInt64 received = 0;
     while (received < size) {
+#ifdef PLU_PLATFORM_WINDOWS
+        UInt64 n = recv(mSocket.GetHandle(), reinterpret_cast<char*>(data + received), size - received, 0);
+        if (n == SOCKET_ERROR) {
+            if (InterruptedError(GetLastError())) continue;
+            PLU_CORE_ERROR("Receive failed! {}", strerror(GetLastError()));
+            return false;
+        }
+#else
         ssize_t n = recv(mSocket.GetHandle(), data + received, size - received, 0);
         if (n < 0) {
             if (InterruptedError(GetLastError())) continue;
             PLU_CORE_ERROR("Receive failed! {}", strerror(GetLastError()));
             return false;
         }
+#endif
+
         if (n == 0) {
             PLU_CORE_WARN("Connection closed after {} of {} bytes", received, size);
             return false;
