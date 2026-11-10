@@ -107,7 +107,7 @@ bool PluNetwork::TcpStream::SendAll(const std::byte* data, UInt64 size)
             break;
         }
 #else
-        ssize_t n = send(mSocket.GetHandle(), data.Data() + sent, data.Size() - sent, MSG_NOSIGNAL);
+        ssize_t n = send(mSocket.GetHandle(), data + sent, size - sent, MSG_NOSIGNAL);
         if (n < 0) {
             if (InterruptedError(GetLastError())) continue;
             PLU_CORE_ERROR("Send failed! {}", strerror(GetLastError()));
